@@ -105,8 +105,8 @@ def train_gan():
         xm.rendezvous('download_only_once')
     # Dataset
     data = mnist_data()
-    if not xm.is_master_ordinal():
-        # Barrier: Wait until master is done downloading
+    if xm.is_master_ordinal():
+        # Master is done, other workers can proceed now
         xm.rendezvous('download_only_once')
     train_sampler = torch.utils.data.distributed.DistributedSampler(
         data,
@@ -194,7 +194,7 @@ def train_gan():
         error = loss(prediction, real_data_target(prediction.size(0)))
         error.backward()
         # Update weights with gradients
-        xm.optimizer_step(optimizer)
+        xm.optimizer_step(optimizer, barrier=True)
         # Return error
         return error
 
@@ -210,7 +210,7 @@ def train_gan():
             fake_data = generator(noise(real_batch.size(0)))
             g_error = train_step_g(g_optimizer, fake_data)
             print(f'D_ERROR: {d_error}, G_ERROR: {g_error}')
-            return d_error, g_error
+        return d_error, g_error
 
 
             # Display Test Images
