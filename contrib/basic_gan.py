@@ -17,7 +17,7 @@ FLAGS['batch_size'] = 128
 FLAGS['num_workers'] = 4
 FLAGS['learning_rate'] = 0.01
 FLAGS['momentum'] = 0.5
-FLAGS['num_epochs'] = 10
+FLAGS['num_epochs'] = 9
 FLAGS['num_cores'] = 8
 FLAGS['log_steps'] = 20
 FLAGS['metrics_debug'] = False
@@ -131,8 +131,8 @@ def train_gan():
     discriminator = DiscriminatorNet().to(device)
     generator = GeneratorNet().to(device)
 
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0002)
-    g_optimizer = optim.Adam(generator.parameters(), lr=0.0002)
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0001)
+    g_optimizer = optim.Adam(generator.parameters(), lr=0.0001)
 
     # Loss function
     loss = nn.BCELoss()
