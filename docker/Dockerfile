@@ -5,7 +5,7 @@
 ARG base_image="ubuntu:16.04"
 FROM "${base_image}"
 
-ARG python_version="3.6"
+ARG python_version="3.7"
 ARG cloud_build="false"
 ARG release_version="nightly"
 ARG cuda="0"

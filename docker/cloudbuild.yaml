@@ -27,7 +27,7 @@ steps:
 substitutions:
     _DOCKER_BASE_IMAGE: 'debian:stretch'
     _CUDA: '0'
-    _PYTHON_VERSION: '3.6'
+    _PYTHON_VERSION: '3.7'
     _RELEASE_VERSION: 'nightly'  # or rX.Y
     _IMAGE_NAME: '${_RELEASE_VERSION}_${_PYTHON_VERSION}'
     _UPLOAD_SUBDIR: ''
