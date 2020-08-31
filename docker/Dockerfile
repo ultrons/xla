@@ -36,7 +36,7 @@ ENV CXX_ABI "${cxx_abi}"
 # https://github.com/GoogleCloudPlatform/cloud-builders/issues/435
 COPY . /pytorch/xla
 RUN if [ "${cloud_build}" = true ]; then github_branch="xla-wheel-2" && \
-  if [ "${release_version}" = "nightly" ]; then github_branch="master"; fi && \
+  if [ "${release_version}" = "nightly" ]; then github_branch="xla-wheel-2"; fi && \
   cd /pytorch && \
   rm -rf xla && \
   git clone -b "${github_branch}" --recursive https://github.com/ultrons/xla && \
