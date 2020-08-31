@@ -5,7 +5,10 @@
 ARG base_image="ubuntu:16.04"
 FROM "${base_image}"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 45dc0113 (updated to python 3.7; 3.6 has no module name dataclass)
 ARG python_version="3.7"
 ARG cloud_build="false"
 ARG release_version="nightly"
@@ -36,11 +39,7 @@ ENV CXX_ABI "${cxx_abi}"
 # https://github.com/GoogleCloudPlatform/cloud-builders/issues/435
 COPY . /pytorch/xla
 RUN if [ "${cloud_build}" = true ]; then github_branch="xla-wheel-2" && \
-<<<<<<< HEAD
   if [ "${release_version}" = "nightly" ]; then github_branch="xla-wheel-2"; fi && \
-=======
-  if [ "${release_version}" = "nightly" ]; then github_branch="master"; fi && \
->>>>>>> 3b18fe1f (modification to point to fork)
   cd /pytorch && \
   rm -rf xla && \
   git clone -b "${github_branch}" --recursive https://github.com/ultrons/xla && \
