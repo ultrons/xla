@@ -1,5 +1,5 @@
 # Cloud Build Configuration which:
-# (1) Builds, tests, and pushes gcr.io/gcp-ml-demo/xla image
+# (1) Builds, tests, and pushes gcr.io/gcp-ml-demo-233523/xla image
 # (2) Collects and stores torch and torch_xla wheels
 steps:
 - name: 'gcr.io/cloud-builders/docker'
@@ -10,17 +10,17 @@ steps:
           '--build-arg', 'python_version=${_PYTHON_VERSION}',
           '--build-arg', 'cloud_build=true',
           '--build-arg', 'release_version=${_RELEASE_VERSION}',
-          '-t', 'gcr.io/gcp-ml-demo/xla:${_IMAGE_NAME}',
+          '-t', 'gcr.io/gcp-ml-demo-233523/xla:${_IMAGE_NAME}',
           '-f', 'docker/Dockerfile', '.'
         ]
   timeout: 14400s
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: bash
-  args: ['-c', 'docker tag gcr.io/gcp-ml-demo/xla:${_IMAGE_NAME} gcr.io/gcp-ml-demo/xla:${_IMAGE_NAME}_$(date -u +%Y%m%d)']
+  args: ['-c', 'docker tag gcr.io/gcp-ml-demo-233523/xla:${_IMAGE_NAME} gcr.io/gcp-ml-demo-233523/xla:${_IMAGE_NAME}_$(date -u +%Y%m%d)']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/gcp-ml-demo/xla']
+  args: ['push', 'gcr.io/gcp-ml-demo-233523/xla']
   timeout: 1800s
-- name: 'gcr.io/gcp-ml-demo/xla:${_IMAGE_NAME}'
+- name: 'gcr.io/gcp-ml-demo-233523/xla:${_IMAGE_NAME}'
   entrypoint: 'bash'
   args: ['-c', 'source /pytorch/xla/docker/common.sh && collect_wheels ${_RELEASE_VERSION}']
 
@@ -39,5 +39,5 @@ timeout: 18000s
 artifacts:
   objects:
     # CUDA wheels exported under `wheels/cuda/<cuda_version>`
-    location: 'gs://gp-ex/gcp-ml-demo/wheels/$_UPLOAD_SUBDIR'
+    location: 'gs://gp-ex/gcp-ml-demo-233523/wheels/$_UPLOAD_SUBDIR'
     paths: ['/**/*.whl']
