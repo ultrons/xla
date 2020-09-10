@@ -12,6 +12,8 @@ ARG cuda="0"
 ARG cuda_compute="7.0,7.5"
 ARG cxx_abi="0"
 
+RUN curl https://raw.githubusercontent.com/dvershinin/apt-get-centos/master/apt-get.sh -o /usr/local/bin/apt-get
+RUN chmod 0755 /usr/local/bin/apt-get
 RUN apt-get update
 RUN apt-get install -y git sudo python-pip python3-pip
 RUN git clone https://github.com/pytorch/pytorch
