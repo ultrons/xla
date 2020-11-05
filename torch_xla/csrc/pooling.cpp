@@ -339,6 +339,16 @@ xla::XlaOp ComputeMaxPoolIndices(
 
 }  // namespace
 
+bool IsSupportedAdaptiveAvgPool3d(absl::Span<const xla::int64> input_size,
+                                  absl::Span<const xla::int64> output_size) {
+  xla::int64 rank = input_size.size();
+  for (int spatial_dim = 0; spatial_dim < 3; ++spatial_dim) {
+    if (input_size[rank - 2 + spatial_dim] % output_size[spatial_dim] != 0) {
+      return false;
+    }
+  }
+  return true;
+}
 bool IsSupportedAdaptiveAvgPool2d(absl::Span<const xla::int64> input_size,
                                   absl::Span<const xla::int64> output_size) {
   xla::int64 rank = input_size.size();
@@ -529,6 +539,28 @@ xla::XlaOp BuildAvgPoolNdBackward(xla::XlaOp out_backprop, xla::XlaOp input,
                             /*spatial_dim_count=*/spatial_dim_count);
 }
 
+xla::XlaOp BuildAdaptiveAvgPool3d(xla::XlaOp input,
+                                  absl::Span<const xla::int64> output_size) {
+  XLA_CHECK_EQ(output_size.size(), 3) << "Invalid output size rank";
+  const auto input_size = XlaHelpers::SizesOfXlaOp(input);
+  XLA_CHECK(input_size.size() == 4 || input_size.size() == 5)
+      << "Only 4D or 5D tensors supported";
+  const auto kernel_size = AdaptiveAvgPoolKernelSize(input_size, output_size);
+  std::vector<std::pair<xla::int64, xla::int64>> no_padding(3);
+  BatchInput batch_input_info =
+      CreateBatchInput(input, /*spatial_dim_count=*/3);
+  xla::XlaOp batch_result = xla::AvgPool(
+      /*operand=*/batch_input_info.batch_input,
+      /*kernel_size=*/kernel_size,
+      /*stride=*/kernel_size,
+      /*padding=*/no_padding,
+      /*data_format=*/MakeNCHWFormat(3),
+      /*counts_include_padding=*/false);
+  return RemoveTrivialBatch(/*batch=*/batch_result,
+                            /*original_rank=*/batch_input_info.original_rank,
+                            /*spatial_dim_count=*/3);
+}
+
 xla::XlaOp BuildAdaptiveAvgPool2d(xla::XlaOp input,
                                   absl::Span<const xla::int64> output_size) {
   XLA_CHECK_EQ(output_size.size(), 2) << "Invalid output size rank";
@@ -551,6 +583,39 @@ xla::XlaOp BuildAdaptiveAvgPool2d(xla::XlaOp input,
                             /*spatial_dim_count=*/2);
 }
 
+xla::XlaOp BuildAdaptiveAvgPool3dBackward(xla::XlaOp out_backprop,
+                                          xla::XlaOp input) {
+  BatchInput batch_out_backprop_info =
+      CreateBatchInput(/*input=*/out_backprop, /*spatial_dim_count=*/3);
+  const auto out_backprop_size =
+      XlaHelpers::SizesOfXlaOp(batch_out_backprop_info.batch_input);
+  XLA_CHECK_EQ(out_backprop_size.size(), 5)
+      << "Invalid rank of gradient output";
+  std::vector<xla::int64> output_size{out_backprop_size[2],
+                                      out_backprop_size[3],
+                                      out_backprop_size[4]};
+  auto gradients_size = XlaHelpers::SizesOfXlaOp(input);
+  XLA_CHECK(gradients_size.size() == 4 || gradients_size.size() == 5)
+      << "Only 4D or 3D tensors supported";
+  if (gradients_size.size() == 4) {
+    gradients_size.insert(gradients_size.begin(), 1);
+  }
+  const auto kernel_size =
+      AdaptiveAvgPoolKernelSize(gradients_size, output_size);
+  std::vector<std::pair<xla::int64, xla::int64>> no_padding(3);
+  xla::XlaOp batch_result = xla::AvgPoolGrad(
+      /*out_backprop=*/batch_out_backprop_info.batch_input,
+      /*gradients_size=*/gradients_size,
+      /*kernel_size=*/kernel_size,
+      /*stride=*/kernel_size,
+      /*spatial_padding=*/no_padding,
+      /*data_format=*/MakeNCHWFormat(3),
+      /*counts_include_padding=*/false);
+  return RemoveTrivialBatch(
+      /*batch=*/batch_result,
+      /*original_rank=*/batch_out_backprop_info.original_rank,
+      /*spatial_dim_count=*/3);
+}
 xla::XlaOp BuildAdaptiveAvgPool2dBackward(xla::XlaOp out_backprop,
                                           xla::XlaOp input) {
   BatchInput batch_out_backprop_info =
