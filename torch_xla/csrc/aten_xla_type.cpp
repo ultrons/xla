@@ -220,7 +220,7 @@ at::Tensor AtenXlaType::adaptive_avg_pool3d(const at::Tensor& self,
                                     output_size_list)) {
     return AtenXlaTypeDefault::adaptive_avg_pool3d(self, output_size);
   }
-  return bridge::AtenFromXlaTensor(XLATensor::_adaptive_avg_pool3d(
+  return bridge::AtenFromXlaTensor(XLATensor::adaptive_avg_pool3d(
       bridge::GetXlaTensor(self), output_size_list));
 }
 
@@ -235,7 +235,7 @@ at::Tensor AtenXlaType::adaptive_avg_pool3d_backward(
                                     output_size)) {
     return AtenXlaTypeDefault::adaptive_avg_pool3d_backward(grad_output, self);
   }
-  return bridge::AtenFromXlaTensor(XLATensor::_adaptive_avg_pool3d_backward(
+  return bridge::AtenFromXlaTensor(XLATensor::adaptive_avg_pool3d_backward(
       bridge::GetXlaTensor(grad_output), bridge::GetXlaTensor(self)));
 }
 
