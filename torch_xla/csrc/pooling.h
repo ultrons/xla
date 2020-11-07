@@ -50,6 +50,19 @@ xla::XlaOp BuildMaxUnpoolNdBackward(xla::XlaOp grad_output, xla::XlaOp input,
                                     absl::Span<const xla::int64> output_size);
 
 // Computes adaptive average pooling for the given input and output size.
+xla::XlaOp BuildAdaptiveAvgPool3d(xla::XlaOp input,
+                                  absl::Span<const xla::int64> output_size);
+
+// Computes the gradient for adaptive average pooling.
+xla::XlaOp BuildAdaptiveAvgPool3dBackward(xla::XlaOp out_backprop,
+                                          xla::XlaOp input);
+
+// Returns true if XLA lowering is supported for the given input and output size
+// combination.
+bool IsSupportedAdaptiveAvgPool3d(absl::Span<const xla::int64> input_size,
+                                  absl::Span<const xla::int64> output_size);
+
+// Computes adaptive average pooling for the given input and output size.
 xla::XlaOp BuildAdaptiveAvgPool2d(xla::XlaOp input,
                                   absl::Span<const xla::int64> output_size);
 
