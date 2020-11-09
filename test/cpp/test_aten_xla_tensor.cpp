@@ -6997,6 +6997,21 @@ TEST_F(AtenXlaTensorTest, TestAdaptiveAvgPool2D) {
   }
 }
 
+TEST_F(AtenXlaTensorTest, TestAdaptiveAvgPool3D) {
+  torch::Tensor input =
+      torch::rand({4, 1, 28, 28}, torch::TensorOptions(torch::kFloat));
+  for (int64_t output_size : {7, 8 }) {
+    torch::Tensor output =
+        torch::adaptive_avg_pool3d(input, {output_size, output_size, output_size});
+    ForEachDevice([&](const torch::Device& device) {
+      torch::Tensor xla_input = CopyToDevice(input, device);
+      torch::Tensor xla_output =
+          torch::adaptive_avg_pool3d(xla_input, {output_size, output_size, output_size});
+      AllClose(output, xla_output);
+    });
+  }
+}
+
 TEST_F(AtenXlaTensorTest, TestAdaptiveAvgPool2DNoBatch) {
   torch::Tensor input =
       torch::rand({1, 28, 28}, torch::TensorOptions(torch::kFloat));
