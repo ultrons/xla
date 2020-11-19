@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e  # Fail on any error.
+set -e  # Fail on any error.
 set -x  # Display commands being run.
 
 PYTHON_VERSION=$1
@@ -50,6 +50,7 @@ function install_llvm_clang {
     export CPATH=/root/anaconda3/include:$CPATH
     make -j
     make install
+    popd
 }
 
 function maybe_append {
@@ -122,7 +123,6 @@ function maybe_install_cuda {
 
 function maybe_install_sources {
   if [ ! -d "torch" ]; then
-    sudo apt-get install -y git
     git clone --recursive https://github.com/pytorch/pytorch.git
     cd pytorch
     git clone --recursive https://github.com/pytorch/xla.git
@@ -131,12 +131,24 @@ function maybe_install_sources {
 }
 
 function install_bazel() {
-     wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
-     mv vbatts-bazel-epel-7.repo /etc/yum.repos.d/
-     yum install -y bazel3
+     #wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo
+     #mv vbatts-bazel-epel-7.repo /etc/yum.repos.d/
+     #yum install -y bazel3
+     # TODO: pick the version from TF
+     BAZEL_VERSION=3.1.0
+     BAZEL_FILE="bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+     curl -L -O "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/${BAZEL_FILE}"
+     chmod u+x  bazel-3.1.0-installer-linux-x86_64.sh
+     ./bazel-3.1.0-installer-linux-x86_64.sh
 }
 function install_req_packages() {
      yum install -y wget
+     yum install -y sudo
+     yum install -y git
+     yum install -y zip
+     yum install -y zlib-devel
+     yum install -y libtool
+     yum install -y  binutils-x86_64-linux-gnu
      yum install -y openssl-devel bzip2-devel
      maybe_install_cuda
      install_bazel
@@ -211,16 +223,16 @@ function install_torchvision_from_source() {
 
 function main() {
   setup_system
-  maybe_install_sources
+  #maybe_install_sources
   install_req_packages
-  install_llvm_clang
   install_and_setup_conda
-  build_and_install_torch
-  pushd xla
-  build_and_install_torch_xla
-  popd
-  install_torchvision_from_source
-  install_gcloud
+  install_llvm_clang
+  #build_and_install_torch
+  #pushd xla
+  #build_and_install_torch_xla
+  #popd
+  #install_torchvision_from_source
+  #install_gcloud
 }
 
-#main
+main
