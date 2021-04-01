@@ -192,7 +192,7 @@ class DistributedExecutor(object):
         '-i',
         '~/.ssh/google_compute_engine',
         local_path,
-        '{}@{}:{}'.format(os.getlogin(), client_worker.get_internal_ip(),
+        '{}@{}:{}'.format(os.environ['USER'], client_worker.get_internal_ip(),
                           remote_path),
     ]
 
@@ -232,7 +232,7 @@ class DistributedExecutor(object):
         '-oStrictHostKeyChecking=no',
         '-i',
         '~/.ssh/google_compute_engine',
-        '{}@{}'.format(os.getlogin(), client_worker.get_internal_ip()),
+        '{}@{}'.format(os.environ['USER'], client_worker.get_internal_ip()),
         '\'{}\''.format(remote_cmd),
     ]
 
