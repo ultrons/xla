@@ -8,6 +8,7 @@ import cloud_tpu_client
 import logging
 import multiprocessing
 import os
+import pwd
 import re
 import signal
 import subprocess
@@ -186,13 +187,14 @@ class DistributedExecutor(object):
           local_path,
           '{}:{}'.format(client_worker.get_hostname(), remote_path),
       ]
+    user_name = pwd.getpwuid(os.getuid())[0]
     return [
         'scp',
         '-oStrictHostKeyChecking=no',
         '-i',
         '~/.ssh/google_compute_engine',
         local_path,
-        '{}@{}:{}'.format(os.environ['USER'], client_worker.get_internal_ip(),
+        '{}@{}:{}'.format(user_name, client_worker.get_internal_ip(),
                           remote_path),
     ]
 
@@ -227,12 +229,13 @@ class DistributedExecutor(object):
             '--command',
             '\'{}\''.format(remote_cmd),
         ]
+    user_name = pwd.getpwuid(os.getuid())[0]
     return [
         'ssh',
         '-oStrictHostKeyChecking=no',
         '-i',
         '~/.ssh/google_compute_engine',
-        '{}@{}'.format(os.environ['USER'], client_worker.get_internal_ip()),
+        '{}@{}'.format(user_name, client_worker.get_internal_ip()),
         '\'{}\''.format(remote_cmd),
     ]
 
@@ -362,7 +365,7 @@ class DistributedExecutor(object):
       if self.tpuvm_mode:
         # Start the local tf server if it is not already running.
         script.append([
-            'python', '-m', self.XRT_RUN_SERVER_CMD, '--port',
+            'python3', '-m', self.XRT_RUN_SERVER_CMD, '--port',
             str(self.tpuvm_server_port)
         ])
       if self.docker_image:
